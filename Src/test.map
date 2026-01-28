@@ -1,0 +1,120 @@
+MPLINK 4.49, Linker
+Linker Map File - Created Tue May 27 23:16:07 2025
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000002
+                   .org_2       code   0x000004    program   0x000548
+      .config_2007_TEST.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000000      
+                            0x000004    0x0002a7      
+                            0x002007    0x002007      
+            678 out of 8454 program addresses used, program memory utilization is 8%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+               CHALLENGE1   0x000006    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+               CHALLENGE2   0x000043    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+               CHALLENGE3   0x00005e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                    DELAY   0x000264    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                DELAY_10S   0x000256    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 DELAY_5S   0x000281    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                DELAY_ACQ   0x000248    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                DELAY_LCD   0x0000b2    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+         DELAY_ONE_SECOND   0x000272    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        DISPLAY_NOT_PRIME   0x000034    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                HARD_LUCK   0x00028e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  INITIAL   0x00007c    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                      ISR   0x000064    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        LOOKUP_CHALLENGE3   0x000070    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 LOOP_10S   0x00025c    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  LOOP_1S   0x000278    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  LOOP_2S   0x00026a    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  LOOP_5S   0x000287    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 LOOP_ACQ   0x00024e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                     MAIN   0x000005    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                   PASS_1   0x00003a    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q0   0x00015e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q1   0x000170    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q2   0x000182    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q3   0x000194    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q4   0x0001a6    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+   QUESTION0_LCD_ADDITION   0x0001b8    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+QUESTION1_LCD_SUBTRACTION   0x0001c7    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        QUESTION2_LCD_MUL   0x0001d6    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        QUESTION3_LCD_DIV   0x0001e5    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        QUESTION4_LCD_MOD   0x0001f4    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+         RANDOM_CHALLENGE   0x000142    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                   REPEAT   0x000144    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                SEND_CHAR   0x0000a2    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 SEND_CMD   0x0000aa    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  START_1   0x00001b    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  START_3   0x000063    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+WAITING_9SECONDS_TOANSWER   0x00020c    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+          YOU_ARE_CORRECT   0x0000ba    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+         YOU_ARE_SO_CLOSE   0x0000e6    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+           YOU_WIN_ESCAPE   0x00010b    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                   endLcd   0x0000b8    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                    loop2   0x0000b5    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                     MAIN   0x000005    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+               CHALLENGE1   0x000006    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  START_1   0x00001b    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        DISPLAY_NOT_PRIME   0x000034    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                   PASS_1   0x00003a    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+               CHALLENGE2   0x000043    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+               CHALLENGE3   0x00005e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  START_3   0x000063    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                      ISR   0x000064    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        LOOKUP_CHALLENGE3   0x000070    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  INITIAL   0x00007c    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                SEND_CHAR   0x0000a2    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 SEND_CMD   0x0000aa    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                DELAY_LCD   0x0000b2    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                    loop2   0x0000b5    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                   endLcd   0x0000b8    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+          YOU_ARE_CORRECT   0x0000ba    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+         YOU_ARE_SO_CLOSE   0x0000e6    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+           YOU_WIN_ESCAPE   0x00010b    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+         RANDOM_CHALLENGE   0x000142    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                   REPEAT   0x000144    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q0   0x00015e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q1   0x000170    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q2   0x000182    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q3   0x000194    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                       Q4   0x0001a6    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+   QUESTION0_LCD_ADDITION   0x0001b8    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+QUESTION1_LCD_SUBTRACTION   0x0001c7    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        QUESTION2_LCD_MUL   0x0001d6    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        QUESTION3_LCD_DIV   0x0001e5    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+        QUESTION4_LCD_MOD   0x0001f4    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+WAITING_9SECONDS_TOANSWER   0x00020c    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                DELAY_ACQ   0x000248    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 LOOP_ACQ   0x00024e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                DELAY_10S   0x000256    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 LOOP_10S   0x00025c    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                    DELAY   0x000264    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  LOOP_2S   0x00026a    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+         DELAY_ONE_SECOND   0x000272    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  LOOP_1S   0x000278    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                 DELAY_5S   0x000281    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                  LOOP_5S   0x000287    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+                HARD_LUCK   0x00028e    program     static C:\Users\ayman\Desktop\miscellaneou\PLAYING\test.asm
+
+

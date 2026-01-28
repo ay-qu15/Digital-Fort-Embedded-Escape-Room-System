@@ -1,0 +1,1410 @@
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+Warning[205]: Found directive in column 1. (__CONFIG)
+2007   3939           00001 __CONFIG _DEBUG_OFF&_CP_OFF&_WRT_HALF&_CPD_OFF&_LVP_OFF&_BODEN_OFF&_PWRTE_OFF&_WDT_OFF&_XT_OSC
+                      00002 ;******************************************************************************************************
+                      00003         include "p16f877A.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ;  MPASM PIC16F877A processor include
+                      00005 ; 
+                      00006 ;  (c) Copyright 1999-2013 Microchip Technology, All rights reserved
+                      00007 ;==========================================================================
+                      00008 
+                      00566         LIST
+                      00004 ;******************************************************************************************************
+                      00005 ; User-defined variables
+                      00006         cblock  0x20
+  00000020            00007                 msd
+  00000021            00008                 lsd
+  00000022            00009                 FLAG
+  00000023            00010                 COUNTER
+  00000024            00011                 RV
+  00000025            00012                 DEFINED_VALUE ;;;ADDED WED 8:24PM       
+  00000026            00013                 temp
+  00000027            00014                 temp2
+  00000028            00015                 ADC_OUTPUT      
+  00000029            00016                 ANSWER
+  0000002A            00017                 DCounter1
+  0000002B            00018                 DCounter2
+  0000002C            00019                 DCounter3
+  0000002D            00020                 ANSWER1
+  0000002E            00021                 FLAG3
+                      00022                 endc
+0000                  00023         ORG 0X00
+0000   2805           00024                 GOTO MAIN
+0004                  00025         ORG 0X04
+0004   2864           00026                 GOTO ISR
+                      00027 
+0005                  00028 MAIN
+0005   207C           00029         CALL INITIAL
+0006                  00030 CHALLENGE1
+0006   18AE           00031         BTFSC FLAG3,1
+0007   228E           00032         CALL HARD_LUCK
+0008   01AE           00033         CLRF FLAG3
+0009   3002           00034         Movlw   0x02            ;Display and cursor home
+000A   20AA           00035         Call    SEND_CMD
+000B   3001           00036         Movlw   0x01            ;clear display
+000C   20AA           00037         Call    SEND_CMD
+000D   1283 1303      00038         BANKSEL PORTC
+000F   30C0           00039         MOVLW B'11000000' ; DISPLAY 0
+0010   0087           00040         MOVWF PORTC    
+0011   2281           00041         CALL DELAY_5S
+0012   1A06           00042         BTFSC PORTB,RB4   ; CHECKING INPUT IF CHANGE 
+0013   281B           00043         GOTO START_1
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0014   1A86           00044         BTFSC PORTB,RB5   ; CHECKING INPUT IF CHANGE
+0015   281B           00045         GOTO START_1
+0016   1B06           00046         BTFSC PORTB,RB6   ; CHECKING INPUT IF CHANGE
+0017   281B           00047         GOTO START_1
+0018   1B86           00048         BTFSC PORTB,RB7   ; CHECKING INPUT IF CHANGE
+0019   281B           00049         GOTO START_1
+001A   2806           00050         GOTO CHALLENGE1
+                      00051 
+001B                  00052 START_1  ;;;;;;;;;;;CHECK IF PRIME (3,5,7,11,13)
+                      00053 ;       CALL DELAY_10S ;;;;;;THIS DELAY IS TO WAIT UNTIL USER INPUTS ALL 4 BITS
+001B   0806           00054         MOVF PORTB,W
+001C   00AD           00055     MOVWF ANSWER1
+001D   30F0           00056     MOVLW b'11110000'
+001E   05AD           00057     ANDWF ANSWER1,F
+001F   0EAD           00058     SWAPF ANSWER1,F
+0020   3003           00059         MOVLW D'3'
+0021   022D           00060         SUBWF ANSWER1, W  
+0022   1903           00061         BTFSC STATUS , Z
+0023   283A           00062         GOTO PASS_1
+0024   3005           00063         MOVLW D'5'
+0025   022D           00064         SUBWF ANSWER1 , W
+0026   1903           00065         BTFSC STATUS , Z
+0027   283A           00066         GOTO PASS_1
+0028   3007           00067         MOVLW D'7'
+0029   022D           00068         SUBWF ANSWER1 , W
+002A   1903           00069         BTFSC STATUS , Z
+002B   283A           00070         GOTO PASS_1
+002C   300B           00071         MOVLW D'11'
+002D   022D           00072         SUBWF ANSWER1 , W
+002E   1903           00073         BTFSC STATUS , Z
+002F   283A           00074         GOTO PASS_1
+0030   300D           00075         MOVLW D'13'
+0031   022D           00076         SUBWF ANSWER1 , W
+0032   1903           00077         BTFSC STATUS , Z
+0033   283A           00078         GOTO PASS_1
+                      00079 
+0034                  00080 DISPLAY_NOT_PRIME
+0034   1283 1303      00081         BANKSEL PORTC
+0036   3036           00082         MOVLW B'00110110'
+0037   0087           00083         MOVWF PORTC
+0038   228E           00084         CALL HARD_LUCK
+                      00085 ;       CALL DELAY ;2SECONDS DELAY MADE INTO 10S
+0039   281B           00086         GOTO START_1
+003A                  00087 PASS_1
+003A   1283 1303      00088         BANKSEL PORTC
+003C   300C           00089         MOVLW B'00001100'
+003D   0087           00090         MOVWF PORTC
+003E   1509           00091         BSF PORTE,RE2 ;LIGHT CORR1 LED
+003F   2264           00092         CALL DELAY
+0040   1109           00093         BCF PORTE,RE2
+0041   30FF           00094         MOVLW D'255'                                    
+0042   0087           00095         MOVWF PORTC
+0043                  00096 CHALLENGE2
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00097 ;       BSF PORTE,RE1
+0043   2264           00098         CALL DELAY   ;;TO GIVE PLAYER TIME TO ROTATE THE KNOB
+0044   1089           00099         BCF PORTE,RE1
+0045   1283 1303      00100         BANKSEL ADCON0
+0047   141F           00101         BSF ADCON0, ADON ;;START TAKING SAMPLES
+0048   2248           00102         CALL DELAY_ACQ      ;;WAIT TO ACQUIRE A SAMPLE
+                      00103         
+0049   151F           00104         BSF ADCON0, GO ;START THE CONVERSION NOW
+004A   2264           00105         CALL DELAY     ;WHEN CONVERSION IS DONE THERE WILL BE AN INTERRUPT
+                      00106                                    ;IN THE INTERRUPT THE CONVERTED VALUE WILL BE SAVED
+                      00107 ;       BSF PORTE,RE1                      
+004B   3033           00108         MOVLW D'51'
+004C   0228           00109         SUBWF ADC_OUTPUT, W
+004D   1C03           00110         BTFSS STATUS, C
+004E   2843           00111         GOTO CHALLENGE2   ;;AND NOTHING IS PRINTED ON LCD
+                      00112 ;       BSF PORTE,RE1
+004F   1003           00113         BCF STATUS,C
+0050   3066           00114         MOVLW D'102'
+0051   0228           00115         SUBWF ADC_OUTPUT, W
+0052   1C03           00116         BTFSS STATUS,C
+0053   28E6           00117         GOTO YOU_ARE_SO_CLOSE
+0054   1003           00118         BCF STATUS,C
+0055   3099           00119         MOVLW D'153'
+0056   0228           00120         SUBWF ADC_OUTPUT, W
+0057   1C03           00121         BTFSS STATUS,C
+0058   28BA           00122         GOTO YOU_ARE_CORRECT
+0059   30CC           00123         MOVLW D'204'
+005A   0228           00124         SUBWF ADC_OUTPUT,W
+005B   1C03           00125         BTFSS STATUS,C
+005C   28E6           00126         GOTO YOU_ARE_SO_CLOSE
+005D   2843           00127         GOTO CHALLENGE2 ;;AND NOTHING IS PRINTED ON LCD
+                      00128         
+                      00129         
+                      00130         
+005E                  00131 CHALLENGE3
+005E   30FF           00132         MOVLW D'255'
+005F   00AE           00133         MOVWF FLAG3
+0060   1C06           00134         BTFSS PORTB,0
+0061   2863           00135         GOTO START_3
+0062   285E           00136         GOTO CHALLENGE3
+0063                  00137 START_3
+0063   2942           00138         GOTO RANDOM_CHALLENGE
+                      00139                 
+0064                  00140 ISR     
+0064   00A6           00141         movwf temp ;context saving
+0065   0E03           00142         swapf STATUS,W
+0066   00A7           00143         MOVWF temp2
+                      00144         
+0067   1283 1303      00145         BANKSEL PIR1
+0069   130C           00146         BCF PIR1,ADIF
+006A   081E           00147         MOVF ADRESH,W
+006B   00A8           00148         MOVWF ADC_OUTPUT
+                      00149 ;       BSF PORTE,RE2
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+006C   0E27           00150         SWAPF temp2,W ;;context retrieval
+006D   0083           00151         MOVWF STATUS
+006E   0826           00152         MOVF temp,W     
+006F   0009           00153         RETFIE
+0070                  00154 LOOKUP_CHALLENGE3
+0070   0782           00155     ADDWF PCL,F
+0071   0000           00156     NOP
+0072   34F9           00157     RETLW 0XF9
+0073   34A4           00158     RETLW 0XA4
+0074   34B0           00159     RETLW 0XB0
+0075   3499           00160     RETLW 0X99
+0076   3492           00161     RETLW 0X92
+0077   3482           00162     RETLW 0X82
+0078   34F8           00163     RETLW 0xF8
+0079   3480           00164     RETLW 0x80
+007A   3498           00165     RETLW 0x98
+007B   0008           00166     RETURN              
+                      00167         
+007C                  00168 INITIAL
+007C   1283 1303      00169         BANKSEL PORTA
+007E   0185           00170         CLRF PORTA
+007F   0186           00171         CLRF PORTB
+0080   0187           00172         CLRF PORTC
+0081   0188           00173         CLRF PORTD
+0082   0189           00174         CLRF PORTE 
+0083   1283 1303      00175         BANKSEL PIR1
+0085   130C           00176         BCF PIR1, ADIF ;;;ADDED ON WEDENSDAY
+                      00177         
+0086   1683 1303      00178         BANKSEL TRISD
+0088   01A3           00179         CLRF COUNTER
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0089   0188           00180         CLRF TRISD
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+008A   0187           00181         CLRF TRISC
+008B   30FF           00182         MOVLW D'255'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+008C   0086           00183         MOVWF TRISB
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+008D   0189           00184         CLRF TRISE
+                      00185 ;       MOVLW D'128'
+                      00186 ;       MOVWF DEFINED_VALUE ;;128 *4 = 512 CORRESPONDS TO 2.5 INPUT VOLTAGE
+                      00187                                                 ;;FROM THE POTENTIOMETER WHICH IS IN R3
+                      00188                                                 ;;*4 COMES FROM ME USING ADRESH AS 8 BITS ONLY AND 
+                      00189                                                 ;;IGNORING ADRESL WHEN THE ADC IS CONVERTING TO 10-BITS
+008E   3001           00190         MOVLW B'00000001'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+008F   0085           00191         MOVWF TRISA
+0090   300E           00192         MOVLW B'00001110'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0091   009F           00193         MOVWF ADCON1
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0092   170C           00194         BSF PIE1, ADIE     ;;ADDED ON WEDNESDAY
+                      00195         
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0093   1283 1303      00196         BANKSEL ADCON0
+0095   3040           00197         MOVLW B'01000000' ;;CHANGED ADON EG BIT0 TO ZERO, NO NEED TO TAKE SAMPLES HERE
+0096   009F           00198         MOVWF ADCON0
+                      00199         
+0097   3038           00200         Movlw   0x38            ;8-bit mode, 2-line display, 5x7 dot format
+0098   20AA           00201         Call    SEND_CMD        
+0099   300E           00202         Movlw   0x0e            ;Display on, Cursor Underline on, Blink off
+009A   20AA           00203         Call    SEND_CMD
+009B   3002           00204         Movlw   0x02            ;Display and cursor home
+009C   20AA           00205         Call    SEND_CMD
+009D   3001           00206         Movlw   0x01            ;clear display
+009E   20AA           00207         Call    SEND_CMD
+                      00208         
+009F   178B           00209         BSF INTCON,GIE
+00A0   170B           00210         BSF INTCON,PEIE
+00A1   0008           00211         RETURN  
+                      00212         
+                      00213 
+00A2                  00214 SEND_CHAR
+00A2   0088           00215         movwf PORTD; Refer to table 1 on Page 5 for review of this subroutine
+00A3   1485           00216         bsf PORTA, 1    
+00A4   1585           00217         bsf PORTA, 3
+00A5   0000           00218         nop
+00A6   1185           00219         bcf PORTA, 3
+00A7   1105           00220         bcf PORTA, 2
+00A8   20B2           00221         call DELAY_LCD
+00A9   0008           00222         return
+                      00223 
+00AA                  00224 SEND_CMD
+00AA   0088           00225         movwf PORTD; Refer to table 1 on Page 5 for review of this subroutine
+00AB   1085           00226         bcf     PORTA, 1
+00AC   1585           00227         bsf     PORTA, 3
+00AD   0000           00228         nop
+00AE   1185           00229         bcf PORTA, 3
+00AF   1105           00230         bcf PORTA, 2
+00B0   20B2           00231         call DELAY_LCD
+00B1   0008           00232         return          
+                      00233 
+00B2                  00234 DELAY_LCD
+00B2   3080           00235         movlw 0x80
+00B3   00A0           00236         movwf msd
+00B4   01A1           00237         clrf lsd
+00B5                  00238 loop2
+00B5   0BA1           00239         decfsz lsd,f
+00B6   28B5           00240         goto loop2
+00B7   0BA0           00241         decfsz msd,f
+00B8                  00242 endLcd
+00B8   28B5           00243         goto loop2
+00B9   0008           00244         return
+                      00245         
+00BA                  00246 YOU_ARE_CORRECT ;;;;;FOR THE 1ST CHALLENGE
+00BA   3059           00247         MOVLW 0X59
+00BB   20A2           00248         CALL SEND_CHAR
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00BC   306F           00249         MOVLW 0X6F
+00BD   20A2           00250         CALL SEND_CHAR
+00BE   3075           00251         MOVLW 0X75
+00BF   20A2           00252         CALL SEND_CHAR
+00C0   3020           00253         MOVLW 0X20    ;;;;;;;;SPACE CHARACTER
+00C1   20A2           00254         CALL SEND_CHAR
+00C2   3041           00255         MOVLW 0X41
+00C3   20A2           00256         CALL SEND_CHAR
+00C4   3072           00257         MOVLW 0X72
+00C5   20A2           00258         CALL SEND_CHAR
+00C6   3065           00259         MOVLW 0X65
+00C7   20A2           00260         CALL SEND_CHAR
+00C8   3020           00261         MOVLW 0X20
+00C9   20A2           00262         CALL SEND_CHAR
+00CA   3043           00263         MOVLW 0X43
+00CB   20A2           00264         CALL SEND_CHAR
+00CC   306F           00265         MOVLW 0X6F
+00CD   20A2           00266         CALL SEND_CHAR
+00CE   3072           00267         MOVLW 0X72
+00CF   20A2           00268         CALL SEND_CHAR
+00D0   3072           00269         MOVLW 0X72
+00D1   20A2           00270         CALL SEND_CHAR
+00D2   3065           00271         MOVLW 0X65
+00D3   20A2           00272         CALL SEND_CHAR
+00D4   3063           00273         MOVLW 0X63
+00D5   20A2           00274         CALL SEND_CHAR
+00D6   3074           00275         MOVLW 0X74
+00D7   20A2           00276         CALL SEND_CHAR
+00D8   3021           00277         MOVLW 0X21      ;;;;;THIS IS FOR ( ! )
+00D9   20A2           00278         CALL SEND_CHAR
+                      00279         
+00DA   3002           00280         Movlw   0x02            ;Display and cursor home
+00DB   20AA           00281         Call    SEND_CMD
+00DC   3001           00282         Movlw   0x01            ;clear display
+00DD   20AA           00283         Call    SEND_CMD
+                      00284         
+00DE   1283 1303      00285         BANKSEL PORTC
+00E0   30FF           00286         MOVLW D'255' 
+00E1   0087           00287         MOVWF PORTC
+00E2   1489           00288         BSF PORTE,1 ;;RE1
+00E3   2264           00289         CALL DELAY
+00E4   1089           00290         BCF PORTE,1
+00E5   285E           00291         GOTO CHALLENGE3
+                      00292 
+00E6                  00293 YOU_ARE_SO_CLOSE
+00E6   3059           00294         MOVLW A'Y'      
+00E7   20A2           00295         CALL SEND_CHAR
+00E8   306F           00296         MOVLW A'o'      
+00E9   20A2           00297         CALL SEND_CHAR
+00EA   3075           00298         MOVLW A'u'      
+00EB   20A2           00299         CALL SEND_CHAR
+00EC   3020           00300         MOVLW A' '      
+00ED   20A2           00301         CALL SEND_CHAR
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00EE   3041           00302         MOVLW A'A'      
+00EF   20A2           00303         CALL SEND_CHAR
+00F0   3072           00304         MOVLW A'r'      
+00F1   20A2           00305         CALL SEND_CHAR
+00F2   3065           00306         MOVLW A'e'      
+00F3   20A2           00307         CALL SEND_CHAR
+00F4   3020           00308         MOVLW A' '      
+00F5   20A2           00309         CALL SEND_CHAR
+00F6   3053           00310         MOVLW A'S'      
+00F7   20A2           00311         CALL SEND_CHAR
+00F8   306F           00312         MOVLW A'o'      
+00F9   20A2           00313         CALL SEND_CHAR
+00FA   3020           00314         MOVLW A' '      
+00FB   20A2           00315         CALL SEND_CHAR
+00FC   3043           00316         MOVLW A'C'      
+00FD   20A2           00317         CALL SEND_CHAR
+00FE   306C           00318         MOVLW A'l'      
+00FF   20A2           00319         CALL SEND_CHAR
+0100   306F           00320         MOVLW A'o'      
+0101   20A2           00321         CALL SEND_CHAR
+0102   3073           00322         MOVLW A's'      
+0103   20A2           00323         CALL SEND_CHAR
+0104   3065           00324         MOVLW A'e'      
+0105   20A2           00325         CALL SEND_CHAR
+                      00326         
+0106   3002           00327         Movlw   0x02            ;Display and cursor home
+0107   20AA           00328         Call    SEND_CMD
+0108   3001           00329         Movlw   0x01            ;clear display
+0109   20AA           00330         Call    SEND_CMD        
+                      00331         
+010A   2843           00332         GOTO CHALLENGE2     ;;TO REPEAT CHALLENGE2 ONLY
+                      00333         
+010B                  00334 YOU_WIN_ESCAPE
+010B   3059           00335         MOVLW A'Y'      
+010C   20A2           00336         CALL SEND_CHAR
+010D   306F           00337         MOVLW A'o'      
+010E   20A2           00338         CALL SEND_CHAR
+010F   3075           00339         MOVLW A'u'      
+0110   20A2           00340         CALL SEND_CHAR
+0111   3020           00341         MOVLW A' '      
+0112   20A2           00342         CALL SEND_CHAR
+0113   3057           00343         MOVLW A'W'      
+0114   20A2           00344         CALL SEND_CHAR
+0115   3069           00345         MOVLW A'i'      
+0116   20A2           00346         CALL SEND_CHAR
+0117   306E           00347         MOVLW A'n'      
+0118   20A2           00348         CALL SEND_CHAR
+0119   3021           00349         MOVLW A'!'      
+011A   20A2           00350         CALL SEND_CHAR
+011B   3020           00351         MOVLW A' '      
+011C   20A2           00352         CALL SEND_CHAR
+011D   3045           00353         MOVLW A'E'      
+011E   20A2           00354         CALL SEND_CHAR
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+011F   3073           00355         MOVLW A's'      
+0120   20A2           00356         CALL SEND_CHAR
+0121   3063           00357         MOVLW A'c'      
+0122   20A2           00358         CALL SEND_CHAR
+0123   3061           00359         MOVLW A'a'      
+0124   20A2           00360         CALL SEND_CHAR
+0125   3070           00361         MOVLW A'p'      
+0126   20A2           00362         CALL SEND_CHAR
+0127   3065           00363         MOVLW A'e'      
+0128   20A2           00364         CALL SEND_CHAR
+                      00365         
+0129   3002           00366         Movlw   0x02            ;Display and cursor home
+012A   20AA           00367         Call    SEND_CMD
+012B   3001           00368         Movlw   0x01            ;clear display
+012C   20AA           00369         Call    SEND_CMD
+                      00370         
+012D   1283 1303      00371         BANKSEL PORTC
+012F   30FF           00372         MOVLW D'255'
+0130   0087           00373         MOVWF PORTC
+                      00374 
+0131   1409           00375         BSF PORTE,0
+0132   1489           00376         BSF PORTE,1
+0133   1509           00377         BSF PORTE,2
+0134   2264           00378         CALL DELAY
+0135   1009           00379         BCF PORTE,RE0
+0136   1089           00380         BCF PORTE,RE1
+0137   1109           00381         BCF PORTE,RE2
+0138   2264           00382         CALL DELAY
+0139   1409           00383         BSF PORTE,0
+013A   1489           00384         BSF PORTE,1
+013B   1509           00385         BSF PORTE,2
+013C   2264           00386         CALL DELAY
+013D   1009           00387         BCF PORTE,RE0
+013E   1089           00388         BCF PORTE,RE1
+013F   1109           00389         BCF PORTE,RE2
+                      00390 
+0140   01AE           00391         CLRF FLAG3      
+0141   0008           00392         RETURN
+                      00393         
+0142                  00394 RANDOM_CHALLENGE ;FIVE PROBLEMS: ADD,SUBTRACT,SHIFT LEFT,SHIFT RIGHT,MOD%
+0142   1283 1303      00395         BANKSEL ADC_OUTPUT
+0144                  00396 REPEAT  
+0144   3005           00397         MOVLW D'5' 
+0145   02A8           00398         SUBWF ADC_OUTPUT,F
+0146   1803           00399         BTFSC STATUS,C
+0147   2944           00400         GOTO REPEAT
+0148   3005           00401         MOVLW D'5'
+0149   07A8           00402         ADDWF ADC_OUTPUT,F ;NOW ADC_OUTPUT HAS THE MOD VALUE AS IN WHICH CHALLENGE TO TAKE
+014A   0180           00403         CLRF W
+014B   0228           00404         SUBWF ADC_OUTPUT,W
+014C   1903           00405         BTFSC STATUS,Z
+014D   295E           00406         GOTO Q0
+014E   3001           00407         MOVLW D'1'
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+014F   0228           00408         SUBWF ADC_OUTPUT,W
+0150   1903           00409         BTFSC STATUS,Z
+0151   2970           00410         GOTO Q1
+0152   3002           00411         MOVLW D'2'
+0153   0228           00412         SUBWF ADC_OUTPUT,W
+0154   1903           00413         BTFSC STATUS,Z
+0155   2982           00414         GOTO Q2
+0156   3003           00415         MOVLW D'3'
+0157   0228           00416         SUBWF ADC_OUTPUT,W
+0158   1903           00417         BTFSC STATUS,Z
+0159   2994           00418         GOTO Q3
+015A   3004           00419         MOVLW D'4'
+015B   0228           00420         SUBWF ADC_OUTPUT,W
+015C   1903           00421         BTFSC STATUS,Z
+015D   29A6           00422         GOTO Q4 
+                      00423 ;       GOTO CHALLENGE1         
+015E                  00424 Q0
+015E   21B8           00425         CALL QUESTION0_LCD_ADDITION
+015F   220C           00426         CALL WAITING_9SECONDS_TOANSWER
+0160   3002           00427                 Movlw   0x02            ;Display and cursor home
+0161   20AA           00428         Call    SEND_CMD
+0162   3001           00429         Movlw   0x01            ;clear display
+0163   20AA           00430         Call    SEND_CMD
+0164   30FF           00431         MOVLW D'255'
+0165   0222           00432         SUBWF FLAG,W
+0166   1903           00433         BTFSC STATUS,Z
+                      00434 ;       GOTO  CHALLENGE1
+0167   30F0           00435         MOVLW b'11110000'
+0168   0586           00436         ANDWF PORTB,F
+0169   0E06           00437         SWAPF PORTB,W
+016A   00A9           00438         MOVWF ANSWER
+016B   3002           00439         MOVLW D'2'
+016C   0229           00440         SUBWF ANSWER,W
+016D   1903           00441         BTFSC STATUS,Z
+016E   210B           00442         CALL YOU_WIN_ESCAPE
+016F   2806           00443         GOTO CHALLENGE1
+0170                  00444 Q1
+0170   21C7           00445         CALL QUESTION1_LCD_SUBTRACTION
+0171   220C           00446         CALL WAITING_9SECONDS_TOANSWER
+0172   3002           00447                 Movlw   0x02            ;Display and cursor home
+0173   20AA           00448         Call    SEND_CMD
+0174   3001           00449         Movlw   0x01            ;clear display
+0175   20AA           00450         Call    SEND_CMD
+0176   30FF           00451         MOVLW D'255'
+0177   0222           00452         SUBWF FLAG,W
+0178   1903           00453         BTFSC STATUS,Z
+                      00454 ;       GOTO  CHALLENGE1
+0179   30F0           00455         MOVLW b'11110000'
+017A   0586           00456         ANDWF PORTB,F
+017B   0E06           00457         SWAPF PORTB,W
+017C   00A9           00458         MOVWF ANSWER
+017D   3001           00459         MOVLW D'1'
+017E   0229           00460         SUBWF ANSWER,W
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+017F   1903           00461         BTFSC STATUS,Z
+0180   210B           00462         CALL YOU_WIN_ESCAPE
+0181   2806           00463         GOTO CHALLENGE1
+0182                  00464 Q2
+0182   21D6           00465         CALL QUESTION2_LCD_MUL
+0183   220C           00466         CALL WAITING_9SECONDS_TOANSWER
+0184   3002           00467         Movlw   0x02            ;Display and cursor home
+0185   20AA           00468         Call    SEND_CMD
+0186   3001           00469         Movlw   0x01            ;clear display
+0187   20AA           00470         Call    SEND_CMD
+0188   30FF           00471         MOVLW D'255'
+0189   0222           00472         SUBWF FLAG,W
+018A   1903           00473         BTFSC STATUS,Z
+                      00474 ;       GOTO  CHALLENGE1
+018B   30F0           00475         MOVLW b'11110000'
+018C   0586           00476         ANDWF PORTB,F
+018D   0E06           00477         SWAPF PORTB,W
+018E   00A9           00478         MOVWF ANSWER
+018F   3004           00479         MOVLW D'4'
+0190   0229           00480         SUBWF ANSWER,W
+0191   1903           00481         BTFSC STATUS,Z
+0192   210B           00482         CALL YOU_WIN_ESCAPE
+0193   2806           00483         GOTO CHALLENGE1
+0194                  00484 Q3
+0194   21E5           00485         CALL QUESTION3_LCD_DIV
+0195   220C           00486         CALL WAITING_9SECONDS_TOANSWER
+0196   3002           00487         Movlw   0x02            ;Display and cursor home
+0197   20AA           00488         Call    SEND_CMD
+0198   3001           00489         Movlw   0x01            ;clear display
+0199   20AA           00490         Call    SEND_CMD
+019A   30FF           00491         MOVLW D'255'
+019B   0222           00492         SUBWF FLAG,W
+019C   1903           00493         BTFSC STATUS,Z
+                      00494 ;       GOTO  CHALLENGE1
+019D   30F0           00495         MOVLW b'11110000'
+019E   0586           00496         ANDWF PORTB,F
+019F   0E06           00497         SWAPF PORTB,W
+01A0   00A9           00498         MOVWF ANSWER
+01A1   3001           00499         MOVLW D'1'
+01A2   0229           00500         SUBWF ANSWER,W
+01A3   1903           00501         BTFSC STATUS,Z
+01A4   210B           00502         CALL YOU_WIN_ESCAPE
+01A5   2806           00503         GOTO CHALLENGE1
+                      00504         
+01A6                  00505 Q4
+01A6   21F4           00506         CALL QUESTION4_LCD_MOD
+01A7   220C           00507         CALL WAITING_9SECONDS_TOANSWER
+01A8   3002           00508                 Movlw   0x02            ;Display and cursor home
+01A9   20AA           00509         Call    SEND_CMD
+01AA   3001           00510         Movlw   0x01            ;clear display
+01AB   20AA           00511         Call    SEND_CMD
+01AC   30FF           00512         MOVLW D'255'
+01AD   0222           00513         SUBWF FLAG,W
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01AE   1903           00514         BTFSC STATUS,Z
+                      00515 ;       GOTO  CHALLENGE1
+01AF   30F0           00516         MOVLW b'11110000'
+01B0   0586           00517         ANDWF PORTB,F
+01B1   0E06           00518         SWAPF PORTB,W
+01B2   00A9           00519         MOVWF ANSWER
+01B3   3002           00520         MOVLW D'2'
+01B4   0229           00521         SUBWF ANSWER,W
+01B5   1903           00522         BTFSC STATUS,Z
+01B6   210B           00523         CALL YOU_WIN_ESCAPE
+01B7   2806           00524         GOTO CHALLENGE1
+                      00525 
+01B8                  00526 QUESTION0_LCD_ADDITION
+01B8   3031           00527         MOVLW A'1'
+01B9   20A2           00528         CALL SEND_CHAR
+01BA   3020           00529         MOVLW A' '
+01BB   20A2           00530         CALL SEND_CHAR
+01BC   302B           00531         MOVLW A'+'
+01BD   20A2           00532         CALL SEND_CHAR
+01BE   3020           00533         MOVLW A' '
+01BF   20A2           00534         CALL SEND_CHAR
+01C0   3031           00535         MOVLW A'1'
+01C1   20A2           00536         CALL SEND_CHAR
+01C2   3020           00537         MOVLW A' '
+01C3   20A2           00538         CALL SEND_CHAR
+01C4   303D           00539         MOVLW A'='
+01C5   20A2           00540         CALL SEND_CHAR  
+01C6   0008           00541         RETURN
+                      00542         
+01C7                  00543 QUESTION1_LCD_SUBTRACTION
+01C7   3032           00544         MOVLW A'2'
+01C8   20A2           00545         CALL SEND_CHAR
+01C9   3020           00546         MOVLW A' '
+01CA   20A2           00547         CALL SEND_CHAR
+01CB   302D           00548         MOVLW A'-'
+01CC   20A2           00549         CALL SEND_CHAR
+01CD   3020           00550         MOVLW A' '
+01CE   20A2           00551         CALL SEND_CHAR
+01CF   3031           00552         MOVLW A'1'
+01D0   20A2           00553         CALL SEND_CHAR
+01D1   3020           00554         MOVLW A' '
+01D2   20A2           00555         CALL SEND_CHAR
+01D3   303D           00556         MOVLW A'='
+01D4   20A2           00557         CALL SEND_CHAR  
+01D5   0008           00558         RETURN
+                      00559 
+01D6                  00560 QUESTION2_LCD_MUL
+01D6   3032           00561         MOVLW A'2'
+01D7   20A2           00562         CALL SEND_CHAR
+01D8   3020           00563         MOVLW A' '
+01D9   20A2           00564         CALL SEND_CHAR
+01DA   302A           00565         MOVLW A'*'
+01DB   20A2           00566         CALL SEND_CHAR
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 12
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+01DC   3020           00567         MOVLW A' '
+01DD   20A2           00568         CALL SEND_CHAR
+01DE   3032           00569         MOVLW A'2'
+01DF   20A2           00570         CALL SEND_CHAR
+01E0   3020           00571         MOVLW A' '
+01E1   20A2           00572         CALL SEND_CHAR
+01E2   303D           00573         MOVLW A'='
+01E3   20A2           00574         CALL SEND_CHAR  
+01E4   0008           00575         RETURN
+                      00576 
+01E5                  00577 QUESTION3_LCD_DIV
+01E5   3035           00578         MOVLW A'5'
+01E6   20A2           00579         CALL SEND_CHAR
+01E7   3020           00580         MOVLW A' '
+01E8   20A2           00581         CALL SEND_CHAR
+01E9   302F           00582         MOVLW A'/'
+01EA   20A2           00583         CALL SEND_CHAR
+01EB   3020           00584         MOVLW A' '
+01EC   20A2           00585         CALL SEND_CHAR
+01ED   3035           00586         MOVLW A'5'
+01EE   20A2           00587         CALL SEND_CHAR
+01EF   3020           00588         MOVLW A' '
+01F0   20A2           00589         CALL SEND_CHAR
+01F1   303D           00590         MOVLW A'='
+01F2   20A2           00591         CALL SEND_CHAR  
+01F3   0008           00592         RETURN
+                      00593 
+01F4                  00594 QUESTION4_LCD_MOD
+01F4   3035           00595         MOVLW A'5'
+01F5   20A2           00596         CALL SEND_CHAR
+01F6   3020           00597         MOVLW A' '
+01F7   20A2           00598         CALL SEND_CHAR
+01F8   304D           00599         MOVLW A'M'
+01F9   20A2           00600         CALL SEND_CHAR
+01FA   306F           00601         MOVLW A'o'
+01FB   20A2           00602         CALL SEND_CHAR
+01FC   3064           00603         MOVLW A'd'
+01FD   20A2           00604         CALL SEND_CHAR
+01FE   3020           00605         MOVLW A' '
+01FF   20A2           00606         CALL SEND_CHAR
+0200   3033           00607         MOVLW A'3'
+0201   20A2           00608         CALL SEND_CHAR
+0202   3020           00609         MOVLW A' '
+0203   20A2           00610         CALL SEND_CHAR
+0204   303D           00611         MOVLW A'='
+0205   20A2           00612         CALL SEND_CHAR  
+0206   0008           00613         RETURN
+                      00614         
+0207   1283 1303      00615         BANKSEL PORTC
+0209   3009           00616         MOVLW D'9'
+020A   00A3           00617         MOVWF COUNTER
+020B   1886           00618         BTFSC PORTB,1
+                      00619         
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 13
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00620 
+                      00621         
+020C                  00622 WAITING_9SECONDS_TOANSWER
+020C   1283 1303      00623         BANKSEL PORTC
+020E   3009           00624         MOVLW D'9'
+                      00625         
+020F   00A3           00626         MOVWF COUNTER     ;;;;;;9
+0210   2070           00627         CALL LOOKUP_CHALLENGE3
+0211   0087           00628         MOVWF PORTC
+0212   2272           00629         CALL DELAY_ONE_SECOND
+0213   1C86           00630         BTFSS PORTB,1
+0214   0008           00631         RETURN
+                      00632         
+0215   0823           00633         MOVF COUNTER,W   ;;;;;;;8
+0216   2070           00634         CALL LOOKUP_CHALLENGE3
+0217   0087           00635         MOVWF PORTC
+0218   2272           00636         CALL DELAY_ONE_SECOND
+0219   1C86           00637         BTFSS PORTB,1
+021A   0008           00638         RETURN
+                      00639         
+021B   0823           00640         MOVF COUNTER,W ;;;;;;;;;7
+021C   2070           00641         CALL LOOKUP_CHALLENGE3
+021D   0087           00642         MOVWF PORTC
+021E   2272           00643         CALL DELAY_ONE_SECOND
+021F   1C86           00644         BTFSS PORTB,1
+0220   0008           00645         RETURN
+                      00646         
+0221   0823           00647         MOVF COUNTER,W;;;;;;;;;;6
+0222   2070           00648         CALL LOOKUP_CHALLENGE3
+0223   0087           00649         MOVWF PORTC
+0224   2272           00650         CALL DELAY_ONE_SECOND
+0225   1C86           00651         BTFSS PORTB,1
+0226   0008           00652         RETURN
+                      00653         
+0227   0823           00654         MOVF COUNTER,W ;;;;;;;;;5
+0228   2070           00655         CALL LOOKUP_CHALLENGE3
+0229   0087           00656         MOVWF PORTC
+022A   2272           00657         CALL DELAY_ONE_SECOND
+022B   1C86           00658         BTFSS PORTB,1
+022C   0008           00659         RETURN
+                      00660         
+022D   0823           00661         MOVF COUNTER,W ;;;;;;;;;4
+022E   2070           00662         CALL LOOKUP_CHALLENGE3
+022F   0087           00663         MOVWF PORTC
+0230   2272           00664         CALL DELAY_ONE_SECOND
+0231   1C86           00665         BTFSS PORTB,1
+0232   0008           00666         RETURN
+                      00667         
+0233   0823           00668         MOVF COUNTER,W ;;;;;;;;;3
+0234   2070           00669         CALL LOOKUP_CHALLENGE3
+0235   0087           00670         MOVWF PORTC
+0236   2272           00671         CALL DELAY_ONE_SECOND
+0237   1C86           00672         BTFSS PORTB,1
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 14
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0238   0008           00673         RETURN
+                      00674         
+0239   0823           00675         MOVF COUNTER,W ;;;;;;;;;2
+023A   2070           00676         CALL LOOKUP_CHALLENGE3
+023B   0087           00677         MOVWF PORTC
+023C   2272           00678         CALL DELAY_ONE_SECOND
+023D   1C86           00679         BTFSS PORTB,1
+023E   0008           00680         RETURN
+                      00681         
+023F   0823           00682         MOVF COUNTER,W ;;;;;;;;;1
+0240   2070           00683         CALL LOOKUP_CHALLENGE3
+0241   0087           00684         MOVWF PORTC
+0242   2272           00685         CALL DELAY_ONE_SECOND
+0243   1C86           00686         BTFSS PORTB,1
+0244   0008           00687         RETURN  
+                      00688         
+                      00689         
+                      00690         
+0245   30FF           00691         MOVLW D'255'
+0246   00A2           00692         MOVWF FLAG
+                      00693                         
+0247   0008           00694         RETURN  ;       GOTO CHALLENGE1 ;THIS WILL BE EXECUTED IF TIME REACHES 0 AND THE
+                      00695                         ; USER HAS NOT ANSWERED
+                      00696                         
+                      00697                         
+0248                  00698 DELAY_ACQ  ;;0.5 SECOND,,,,500 MILLISECONDS
+0248   3054           00699         MOVLW 0X54
+0249   00AA           00700         MOVWF DCounter1
+024A   308A           00701         MOVLW 0X8a
+024B   00AB           00702         MOVWF DCounter2
+024C   3003           00703         MOVLW 0X03
+024D   00AC           00704         MOVWF DCounter3
+024E                  00705 LOOP_ACQ
+024E   0BAA           00706         DECFSZ DCounter1, 1
+024F   2A4E           00707         GOTO LOOP_ACQ
+0250   0BAB           00708         DECFSZ DCounter2, 1
+0251   2A4E           00709         GOTO LOOP_ACQ
+0252   0BAC           00710         DECFSZ DCounter3, 1
+0253   2A4E           00711         GOTO LOOP_ACQ
+0254   0000           00712         NOP
+0255   0008           00713         RETURN
+0256                  00714 DELAY_10S
+0256   30DE           00715         MOVLW 0Xde
+0257   00AA           00716         MOVWF DCounter1
+0258   30BB           00717         MOVLW 0Xbb
+0259   00AB           00718         MOVWF DCounter2
+025A   3033           00719         MOVLW 0X33
+025B   00AC           00720         MOVWF DCounter3
+025C                  00721 LOOP_10S
+025C   0BAA           00722         DECFSZ DCounter1, 1
+025D   2A5C           00723         GOTO LOOP_10S
+025E   0BAB           00724         DECFSZ DCounter2, 1
+025F   2A5C           00725         GOTO LOOP_10S
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 15
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0260   0BAC           00726         DECFSZ DCounter3, 1
+0261   2A5C           00727         GOTO LOOP_10S
+0262   0000           00728         NOP
+0263   0008           00729         RETURN
+0264                  00730 DELAY ;THIS DELAY IS 2SECONDS
+0264   305C           00731         MOVLW 0X5c
+0265   00AA           00732         MOVWF DCounter1
+0266   3026           00733         MOVLW 0X26
+0267   00AB           00734         MOVWF DCounter2
+0268   300B           00735         MOVLW 0X0b
+0269   00AC           00736         MOVWF DCounter3
+026A                  00737 LOOP_2S
+026A   0BAA           00738         DECFSZ DCounter1, 1
+026B   2A6A           00739         GOTO LOOP_2S
+026C   0BAB           00740         DECFSZ DCounter2, 1
+026D   2A6A           00741         GOTO LOOP_2S
+026E   0BAC           00742         DECFSZ DCounter3, 1
+026F   2A6A           00743         GOTO LOOP_2S
+0270   0000           00744         NOP
+0271   0008           00745         RETURN
+0272                  00746 DELAY_ONE_SECOND
+0272   30AC           00747         MOVLW 0Xac
+0273   00AA           00748         MOVWF DCounter1
+0274   3013           00749         MOVLW 0X13
+0275   00AB           00750         MOVWF DCounter2
+0276   3006           00751         MOVLW 0X06
+0277   00AC           00752         MOVWF DCounter3
+0278                  00753 LOOP_1S
+0278   0BAA           00754         DECFSZ DCounter1, 1
+0279   2A78           00755         GOTO LOOP_1S
+027A   0BAB           00756         DECFSZ DCounter2, 1
+027B   2A78           00757         GOTO LOOP_1S
+027C   0BAC           00758         DECFSZ DCounter3, 1
+027D   2A78           00759         GOTO LOOP_1S
+027E   0000           00760         NOP
+027F   03A3           00761         DECF COUNTER,F
+0280   0008           00762         RETURN
+0281                  00763 DELAY_5S
+0281   306D           00764         MOVLW 0X6d
+0282   00AA           00765         MOVWF DCounter1
+0283   305E           00766         MOVLW 0X5e
+0284   00AB           00767         MOVWF DCounter2
+0285   301A           00768         MOVLW 0X1a
+0286   00AC           00769         MOVWF DCounter3
+0287                  00770 LOOP_5S
+0287   0BAA           00771         DECFSZ DCounter1, 1
+0288   2A87           00772         GOTO LOOP_5S
+0289   0BAB           00773         DECFSZ DCounter2, 1
+028A   2A87           00774         GOTO LOOP_5S
+028B   0BAC           00775         DECFSZ DCounter3, 1
+028C   2A87           00776         GOTO LOOP_5S
+028D   0008           00777         RETURN  
+                      00778 
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 16
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+028E                  00779 HARD_LUCK
+028E   3048           00780         MOVLW A'H'
+028F   20A2           00781         CALL SEND_CHAR
+0290   3041           00782         MOVLW A'A'
+0291   20A2           00783         CALL SEND_CHAR
+0292   3052           00784         MOVLW A'R'
+0293   20A2           00785         CALL SEND_CHAR
+0294   3044           00786         MOVLW A'D'
+0295   20A2           00787         CALL SEND_CHAR
+0296   3020           00788         MOVLW A' '
+0297   20A2           00789         CALL SEND_CHAR
+0298   304C           00790         MOVLW A'L'
+0299   20A2           00791         CALL SEND_CHAR
+029A   3055           00792         MOVLW A'U'
+029B   20A2           00793         CALL SEND_CHAR
+029C   3043           00794         MOVLW A'C'
+029D   20A2           00795         CALL SEND_CHAR
+029E   304B           00796         MOVLW A'K'
+029F   20A2           00797         CALL SEND_CHAR  
+02A0   3021           00798         MOVLW A'!'
+02A1   20A2           00799         CALL SEND_CHAR
+02A2   2264           00800         CALL DELAY
+                      00801         
+02A3   3002           00802         Movlw   0x02            ;Display and cursor home
+02A4   20AA           00803         Call    SEND_CMD
+02A5   3001           00804         Movlw   0x01            ;clear display
+02A6   20AA           00805         Call    SEND_CMD
+                      00806         
+02A7   0008           00807         RETURN
+                      00808                 
+                      00809                                                                 
+                      00810         END
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 17
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ACKDT                             00000005
+ACKEN                             00000004
+ACKSTAT                           00000006
+ADCON0                            0000001F
+ADCON1                            0000009F
+ADCS0                             00000006
+ADCS1                             00000007
+ADCS2                             00000006
+ADC_OUTPUT                        00000028
+ADDEN                             00000003
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANSWER                            00000029
+ANSWER1                           0000002D
+BCLIE                             00000003
+BCLIF                             00000003
+BF                                00000000
+BRGH                              00000002
+C                                 00000000
+C1INV                             00000004
+C1OUT                             00000006
+C2INV                             00000005
+C2OUT                             00000007
+CCP1CON                           00000017
+CCP1IE                            00000002
+CCP1IF                            00000002
+CCP1M0                            00000000
+CCP1M1                            00000001
+CCP1M2                            00000002
+CCP1M3                            00000003
+CCP1X                             00000005
+CCP1Y                             00000004
+CCP2CON                           0000001D
+CCP2IE                            00000000
+CCP2IF                            00000000
+CCP2M0                            00000000
+CCP2M1                            00000001
+CCP2M2                            00000002
+CCP2M3                            00000003
+CCP2X                             00000005
+CCP2Y                             00000004
+CCPR1                             00000015
+CCPR1H                            00000016
+CCPR1L                            00000015
+CCPR2                             0000001B
+CCPR2H                            0000001C
+CCPR2L                            0000001B
+CHALLENGE1                        00000006
+CHALLENGE2                        00000043
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 18
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+CHALLENGE3                        0000005E
+CHS0                              00000003
+CHS1                              00000004
+CHS2                              00000005
+CIS                               00000003
+CKE                               00000006
+CKP                               00000004
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             0000009C
+CMIE                              00000006
+CMIF                              00000006
+COUNTER                           00000023
+CREN                              00000004
+CSRC                              00000007
+CVR0                              00000000
+CVR1                              00000001
+CVR2                              00000002
+CVR3                              00000003
+CVRCON                            0000009D
+CVREN                             00000007
+CVROE                             00000006
+CVRR                              00000005
+D                                 00000005
+DATA_ADDRESS                      00000005
+DC                                00000001
+DCounter1                         0000002A
+DCounter2                         0000002B
+DCounter3                         0000002C
+DEFINED_VALUE                     00000025
+DELAY                             00000264
+DELAY_10S                         00000256
+DELAY_5S                          00000281
+DELAY_ACQ                         00000248
+DELAY_LCD                         000000B2
+DELAY_ONE_SECOND                  00000272
+DISPLAY_NOT_PRIME                 00000034
+D_A                               00000005
+D_NOT_A                           00000005
+EEADR                             0000010D
+EEADRH                            0000010F
+EECON1                            0000018C
+EECON2                            0000018D
+EEDATA                            0000010C
+EEDATH                            0000010E
+EEIE                              00000004
+EEIF                              00000004
+EEPGD                             00000007
+F                                 00000001
+FERR                              00000002
+FLAG                              00000022
+FLAG3                             0000002E
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 19
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+FSR                               00000004
+GCEN                              00000007
+GIE                               00000007
+GO                                00000002
+GO_DONE                           00000002
+GO_NOT_DONE                       00000002
+HARD_LUCK                         0000028E
+I2C_DATA                          00000005
+I2C_READ                          00000002
+I2C_START                         00000003
+I2C_STOP                          00000004
+IBF                               00000007
+IBOV                              00000005
+INDF                              00000000
+INITIAL                           0000007C
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IRP                               00000007
+ISR                               00000064
+LOOKUP_CHALLENGE3                 00000070
+LOOP_10S                          0000025C
+LOOP_1S                           00000278
+LOOP_2S                           0000026A
+LOOP_5S                           00000287
+LOOP_ACQ                          0000024E
+MAIN                              00000005
+NOT_A                             00000005
+NOT_ADDRESS                       00000005
+NOT_BO                            00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000002
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_RBPU                          00000007
+NOT_RC8                           00000006
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+NOT_TX8                           00000006
+NOT_W                             00000002
+NOT_WRITE                         00000002
+OBF                               00000006
+OERR                              00000001
+OPTION_REG                        00000081
+P                                 00000004
+PASS_1                            0000003A
+PCFG0                             00000000
+PCFG1                             00000001
+PCFG2                             00000002
+PCFG3                             00000003
+PCL                               00000002
+PCLATH                            0000000A
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 20
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+PCON                              0000008E
+PEIE                              00000006
+PEN                               00000002
+PIE1                              0000008C
+PIE2                              0000008D
+PIR1                              0000000C
+PIR2                              0000000D
+PORTA                             00000005
+PORTB                             00000006
+PORTC                             00000007
+PORTD                             00000008
+PORTE                             00000009
+PR2                               00000092
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+PSPIE                             00000007
+PSPIF                             00000007
+PSPMODE                           00000004
+Q0                                0000015E
+Q1                                00000170
+Q2                                00000182
+Q3                                00000194
+Q4                                000001A6
+QUESTION0_LCD_ADDITION            000001B8
+QUESTION1_LCD_SUBTRACTION         000001C7
+QUESTION2_LCD_MUL                 000001D6
+QUESTION3_LCD_DIV                 000001E5
+QUESTION4_LCD_MOD                 000001F4
+R                                 00000002
+RA0                               00000000
+RA1                               00000001
+RA2                               00000002
+RA3                               00000003
+RA4                               00000004
+RA5                               00000005
+RANDOM_CHALLENGE                  00000142
+RB0                               00000000
+RB1                               00000001
+RB2                               00000002
+RB3                               00000003
+RB4                               00000004
+RB5                               00000005
+RB6                               00000006
+RB7                               00000007
+RBIE                              00000003
+RBIF                              00000000
+RC0                               00000000
+RC1                               00000001
+RC2                               00000002
+RC3                               00000003
+RC4                               00000004
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 21
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+RC5                               00000005
+RC6                               00000006
+RC7                               00000007
+RC8_9                             00000006
+RC9                               00000006
+RCD8                              00000000
+RCEN                              00000003
+RCIE                              00000005
+RCIF                              00000005
+RCREG                             0000001A
+RCSTA                             00000018
+RD                                00000000
+RD0                               00000000
+RD1                               00000001
+RD2                               00000002
+RD3                               00000003
+RD4                               00000004
+RD5                               00000005
+RD6                               00000006
+RD7                               00000007
+RE0                               00000000
+RE1                               00000001
+RE2                               00000002
+READ_WRITE                        00000002
+REPEAT                            00000144
+RP0                               00000005
+RP1                               00000006
+RSEN                              00000001
+RV                                00000024
+RX9                               00000006
+RX9D                              00000000
+R_NOT_W                           00000002
+R_W                               00000002
+S                                 00000003
+SEN                               00000000
+SEND_CHAR                         000000A2
+SEND_CMD                          000000AA
+SMP                               00000007
+SPBRG                             00000099
+SPEN                              00000007
+SREN                              00000005
+SSPADD                            00000093
+SSPBUF                            00000013
+SSPCON                            00000014
+SSPCON2                           00000091
+SSPEN                             00000005
+SSPIE                             00000003
+SSPIF                             00000003
+SSPM0                             00000000
+SSPM1                             00000001
+SSPM2                             00000002
+SSPM3                             00000003
+SSPOV                             00000006
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 22
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+SSPSTAT                           00000094
+START_1                           0000001B
+START_3                           00000063
+STATUS                            00000003
+SYNC                              00000004
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1INSYNC                          00000002
+T1OSCEN                           00000003
+T1SYNC                            00000002
+T2CKPS0                           00000000
+T2CKPS1                           00000001
+T2CON                             00000012
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TMR2                              00000011
+TMR2IE                            00000001
+TMR2IF                            00000001
+TMR2ON                            00000002
+TOUTPS0                           00000003
+TOUTPS1                           00000004
+TOUTPS2                           00000005
+TOUTPS3                           00000006
+TRISA                             00000085
+TRISA0                            00000000
+TRISA1                            00000001
+TRISA2                            00000002
+TRISA3                            00000003
+TRISA4                            00000004
+TRISA5                            00000005
+TRISB                             00000086
+TRISB0                            00000000
+TRISB1                            00000001
+TRISB2                            00000002
+TRISB3                            00000003
+TRISB4                            00000004
+TRISB5                            00000005
+TRISB6                            00000006
+TRISB7                            00000007
+TRISC                             00000087
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 23
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+TRISC0                            00000000
+TRISC1                            00000001
+TRISC2                            00000002
+TRISC3                            00000003
+TRISC4                            00000004
+TRISC5                            00000005
+TRISC6                            00000006
+TRISC7                            00000007
+TRISD                             00000088
+TRISD0                            00000000
+TRISD1                            00000001
+TRISD2                            00000002
+TRISD3                            00000003
+TRISD4                            00000004
+TRISD5                            00000005
+TRISD6                            00000006
+TRISD7                            00000007
+TRISE                             00000089
+TRISE0                            00000000
+TRISE1                            00000001
+TRISE2                            00000002
+TRMT                              00000001
+TX8_9                             00000006
+TX9                               00000006
+TX9D                              00000000
+TXD8                              00000000
+TXEN                              00000005
+TXIE                              00000004
+TXIF                              00000004
+TXREG                             00000019
+TXSTA                             00000098
+UA                                00000001
+W                                 00000000
+WAITING_9SECONDS_TOANSWER         0000020C
+WCOL                              00000007
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+YOU_ARE_CORRECT                   000000BA
+YOU_ARE_SO_CLOSE                  000000E6
+YOU_WIN_ESCAPE                    0000010B
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+_CPD_ON                           00003EFF
+_CP_ALL                           00001FFF
+_CP_OFF                           00003FFF
+_CP_ON                            00001FFF
+_DEBUG_OFF                        00003FFF
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 24
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_DEBUG_ON                         000037FF
+_DEVID1                           00002006
+_FOSC_EXTRC                       00003FFF
+_FOSC_HS                          00003FFE
+_FOSC_LP                          00003FFC
+_FOSC_XT                          00003FFD
+_HS_OSC                           00003FFE
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_LP_OSC                           00003FFC
+_LVP_OFF                          00003F7F
+_LVP_ON                           00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FF7
+_RC_OSC                           00003FFF
+_WDTE_OFF                         00003FFB
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FFB
+_WDT_ON                           00003FFF
+_WRT_1FOURTH                      00003BFF
+_WRT_256                          00003DFF
+_WRT_HALF                         000039FF
+_WRT_OFF                          00003FFF
+_XT_OSC                           00003FFD
+__16F877A                         00000001
+__DEBUG                           1
+endLcd                            000000B8
+loop2                             000000B5
+lsd                               00000021
+msd                               00000020
+temp                              00000026
+temp2                             00000027
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+0000 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+00C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0100 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0140 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0180 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+01C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+MPASM  5.51                          TEST.ASM   5-27-2025  23:16:06         PAGE 25
+
+
+MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
+
+
+0200 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0240 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0280 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXX-------- ----------------
+2000 : -------X-------- ---------------- ---------------- ----------------
+
+All other memory blocks unused.
+
+Program Memory Words Used:   677
+Program Memory Words Free:  7515
+
+
+Errors   :     0
+Warnings :     1 reported,     0 suppressed
+Messages :     7 reported,     0 suppressed
+
+
